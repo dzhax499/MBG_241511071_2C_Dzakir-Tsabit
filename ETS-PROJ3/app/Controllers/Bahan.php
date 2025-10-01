@@ -68,4 +68,69 @@ class Bahan extends BaseController
 
         return redirect()->to('/bahan')->with('success', 'Bahan berhasil ditambahkan');
     }
+    public function edit($id)
+    {
+        $model = new BahanModel();
+        $data = [
+            'title' => 'Edit Bahan Baku',
+            'bahan' => $model->find($id)
+        ];
+
+        if (!$data['bahan']) {
+            return redirect()->to('/bahan')->with('error', 'Data tidak ditemukan');
+        }
+
+        echo view('templates/header', $data);
+        echo view('bahan/edit', $data);
+        echo view('templates/footer');
+    }
+
+    public function update($id)
+    {
+        $rules = [
+            'nama' => 'required|min_length[3]',
+            'kategori' => 'required',
+            'jumlah' => 'required|integer|greater_than_equal_to[0]',
+            'satuan' => 'required',
+            'tanggal_masuk' => 'required|valid_date',
+            'tanggal_kadaluarsa' => 'required|valid_date'
+        ];
+
+        if (! $this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $tanggal_kadaluarsa = $this->request->getPost('tanggal_kadaluarsa');
+        $today = strtotime(date('Y-m-d'));
+        $kadaluarsa = strtotime($tanggal_kadaluarsa);
+
+        if ($kadaluarsa < $today) {
+            $status = 'kadaluarsa';
+        } elseif ($kadaluarsa <= strtotime('+3 days', $today)) {
+            $status = 'segera_kadaluarsa';
+        } else {
+            $status = 'tersedia';
+        }
+
+        $model = new BahanModel();
+        $model->update($id, [
+            'nama' => $this->request->getPost('nama'),
+            'kategori' => $this->request->getPost('kategori'),
+            'jumlah' => $this->request->getPost('jumlah'),
+            'satuan' => $this->request->getPost('satuan'),
+            'tanggal_masuk' => $this->request->getPost('tanggal_masuk'),
+            'tanggal_kadaluarsa' => $tanggal_kadaluarsa,
+            'status' => $status
+        ]);
+
+        return redirect()->to('/bahan')->with('success', 'Bahan berhasil diupdate');
+    }
+    
+    public function delete($id)
+    {
+        $model = new BahanModel();
+        $model->delete($id);
+
+        return redirect()->to('/bahan')->with('success', 'Bahan berhasil dihapus');
+    }
 }

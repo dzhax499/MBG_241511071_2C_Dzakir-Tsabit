@@ -12,6 +12,7 @@
             <th>Tanggal Masuk</th>
             <th>Tanggal Kadaluarsa</th>
             <th>Status</th>
+            <th>Aksi</th>
         </tr>
     </thead>
     <tbody>
@@ -26,11 +27,15 @@
                     <td><?= esc($b['tanggal_masuk']) ?></td>
                     <td><?= esc($b['tanggal_kadaluarsa']) ?></td>
                     <td><?= esc($b['status']) ?></td>
+                    <td>
+                        <a href="/bahan/edit/<?= $b['id'] ?>" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="/bahan/delete/<?= $b['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus?')">Delete</a>
+                    </td>
                 </tr>
             <?php endforeach;
         else: ?>
             <tr>
-                <td colspan="8" class="text-center">Belum ada data</td>
+                <td colspan="9" class="text-center">Belum ada data</td>
             </tr>
         <?php endif; ?>
     </tbody>

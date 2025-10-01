@@ -17,5 +17,9 @@ $routes->group('bahan', function($routes) {
     $routes->get('/', 'Bahan::index');
     $routes->get('create', 'Bahan::create');
     $routes->post('store', 'Bahan::store');
+
+    $routes->get('edit/(:num)', 'Bahan::edit/$1');
+    $routes->post('update/(:num)', 'Bahan::update/$1');
+    $routes->get('delete/(:num)', 'Bahan::delete/$1');
 });
 
