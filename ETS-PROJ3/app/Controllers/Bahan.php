@@ -43,12 +43,16 @@ class Bahan extends BaseController
         }
 
         $tanggal_kadaluarsa = $this->request->getPost('tanggal_kadaluarsa');
+        $jumlah = (int) $this->request->getPost('jumlah');
         $today = strtotime(date('Y-m-d'));
         $kadaluarsa = strtotime($tanggal_kadaluarsa);
+        $selisih_hari = ceil(($kadaluarsa - $today) / 86400);
 
-        if ($kadaluarsa < $today) {
+        if ($jumlah == 0) {
+            $status = 'habis';
+        } elseif ($today >= $kadaluarsa) {
             $status = 'kadaluarsa';
-        } elseif ($kadaluarsa <= strtotime('+3 days', $today)) {
+        } elseif ($selisih_hari <= 3 && $jumlah > 0) {
             $status = 'segera_kadaluarsa';
         } else {
             $status = 'tersedia';
@@ -101,12 +105,16 @@ class Bahan extends BaseController
         }
 
         $tanggal_kadaluarsa = $this->request->getPost('tanggal_kadaluarsa');
+        $jumlah = (int) $this->request->getPost('jumlah');
         $today = strtotime(date('Y-m-d'));
         $kadaluarsa = strtotime($tanggal_kadaluarsa);
+        $selisih_hari = ceil(($kadaluarsa - $today) / 86400);
 
-        if ($kadaluarsa < $today) {
+        if ($jumlah == 0) {
+            $status = 'habis';
+        } elseif ($today >= $kadaluarsa) {
             $status = 'kadaluarsa';
-        } elseif ($kadaluarsa <= strtotime('+3 days', $today)) {
+        } elseif ($selisih_hari <= 3 && $jumlah > 0) {
             $status = 'segera_kadaluarsa';
         } else {
             $status = 'tersedia';
@@ -125,7 +133,7 @@ class Bahan extends BaseController
 
         return redirect()->to('/bahan')->with('success', 'Bahan berhasil diupdate');
     }
-    
+
     public function delete($id)
     {
         $model = new BahanModel();
