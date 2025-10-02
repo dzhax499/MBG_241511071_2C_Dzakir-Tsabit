@@ -26,7 +26,22 @@
                     <td><?= esc($b['satuan']) ?></td>
                     <td><?= esc($b['tanggal_masuk']) ?></td>
                     <td><?= esc($b['tanggal_kadaluarsa']) ?></td>
-                    <td><?= esc($b['status']) ?></td>
+                    <td>
+                        <?php
+                        $statusText = [
+                            'tersedia' => ['label' => 'Tersedia', 'class' => 'badge bg-success'],
+                            'habis' => ['label' => 'Stok Habis', 'class' => 'badge bg-danger'],
+                            'kadaluarsa' => ['label' => 'Kadaluarsa', 'class' => 'badge bg-secondary'],
+                            'segera_kadaluarsa' => ['label' => 'Segera Kadaluarsa', 'class' => 'badge bg-warning text-dark']
+                        ];
+                        $status = $b['status'];
+                        if (isset($statusText[$status])) {
+                            echo '<span class="' . $statusText[$status]['class'] . '">' . $statusText[$status]['label'] . '</span>';
+                        } else {
+                            echo esc($status);
+                        }
+                        ?>
+                    </td>
                     <td>
                         <a href="/bahan/edit/<?= $b['id'] ?>" class="btn btn-sm btn-warning">Edit</a>
                         <a href="/bahan/delete/<?= $b['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus?')">Delete</a>
