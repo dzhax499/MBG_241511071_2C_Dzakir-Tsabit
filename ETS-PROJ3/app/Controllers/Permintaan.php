@@ -96,4 +96,103 @@ class Permintaan extends BaseController
 
         return redirect()->to('/permintaan')->with('success', 'Permintaan berhasil dibuat');
     }
+
+    public function approve($id)
+    {
+        $permintaanModel = new PermintaanModel();
+        $detailModel = new PermintaanDetailModel();
+        $bahanModel = new BahanModel();
+
+        $details = $detailModel->where('permintaan_id', $id)->findAll();
+
+        // Cek stok cukup
+        foreach ($details as $d) {
+            $bahan = $bahanModel->find($d['bahan_id']);
+            if ($bahan['jumlah'] < $d['jumlah_diminta']) {
+                return redirect()->back()->with('error', 'Stok ' . $bahan['nama'] . ' tidak mencukupi');
+            }
+        }
+
+        // Kurangi stok dan update status bahan jika habis
+        foreach ($details as $d) {
+            $bahan = $bahanModel->find($d['bahan_id']);
+            $stok_akhir = $bahan['jumlah'] - $d['jumlah_diminta'];
+            $status = $bahan['status'];
+            if ($stok_akhir <= 0) {
+                $stok_akhir = 0;
+                $status = 'habis';
+            }
+            $bahanModel->update($bahan['id'], [
+                'jumlah' => $stok_akhir,
+                'status' => $status
+            ]);
+        }
+
+        $permintaanModel->update($id, ['status' => 'disetujui']);
+        return redirect()->to('/permintaan')->with('success', 'Permintaan disetujui dan stok bahan diperbarui');
+    }
+
+    public function reject($id)
+    {
+        $permintaanModel = new PermintaanModel();
+        $permintaanModel->update($id, ['status' => 'ditolak']);
+        return redirect()->to('/permintaan')->with('success', 'Permintaan ditolak');
+    }
+    public function reject_form($id)
+    {
+        $permintaanModel = new PermintaanModel();
+        $permintaan = $permintaanModel->find($id);
+
+        if (!$permintaan) {
+            return redirect()->to('/permintaan')->with('error', 'Permintaan tidak ditemukan');
+        }
+
+        $data = [
+            'title' => 'Alasan Penolakan',
+            'permintaan' => $permintaan
+        ];
+
+        echo view('templates/header', $data);
+        echo view('permintaan/reject_form', $data);
+        echo view('templates/footer');
+    }
+
+    public function detail($id)
+    {
+        $permintaanModel = new PermintaanModel();
+        $detailModel = new PermintaanDetailModel();
+        $bahanModel = new BahanModel();
+
+        $permintaan = $permintaanModel
+            ->select('permintaan.*, user.name as pemohon')
+            ->join('user', 'user.id=permintaan.pemohon_id')
+            ->where('permintaan.id', $id)
+            ->first();
+
+        if (!$permintaan) {
+            return redirect()->to('/permintaan')->with('error', 'Permintaan tidak ditemukan');
+        }
+
+        // Ambil detail bahan yang diminta
+        $details = $detailModel
+            ->where('permintaan_id', $id)
+            ->findAll();
+
+        // Gabungkan dengan data bahan
+        foreach ($details as &$d) {
+            $bahan = $bahanModel->find($d['bahan_id']);
+            $d['nama_bahan'] = $bahan['nama'] ?? '-';
+            $d['satuan'] = $bahan['satuan'] ?? '';
+        }
+
+        $data = [
+            'title' => 'Detail Permintaan',
+            'permintaan' => $permintaan,
+            'details' => $details
+        ];
+
+        return view('templates/header', $data)
+            . view('permintaan/detail', $data)
+            . view('templates/footer');
+    }
 }

@@ -27,6 +27,11 @@ $routes->group('permintaan', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'Permintaan::index');
     $routes->get('create', 'Permintaan::create', ['filter' => 'role:dapur']);
     $routes->post('store', 'Permintaan::store', ['filter' => 'role:dapur']);
+    $routes->get('approve/(:num)', 'Permintaan::approve/$1', ['filter' => 'role:gudang']);
+    $routes->get('reject_form/(:num)', 'Permintaan::reject_form/$1', ['filter' => 'role:gudang']);
+    $routes->post('reject/(:num)', 'Permintaan::reject/$1', ['filter' => 'role:gudang']);
+    $routes->get('reject_form/(:num)', 'Permintaan::reject_form/$1', ['filter' => 'role:gudang']);
+    $routes->get('detail/(:num)', 'Permintaan::detail/$1');
 });
 
 // jika sudah login maka login akan di arahkan ke dashboard

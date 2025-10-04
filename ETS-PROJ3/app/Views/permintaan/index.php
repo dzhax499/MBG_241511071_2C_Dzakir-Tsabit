@@ -41,9 +41,14 @@
                         <?php endif; ?>
                     </td>
 
-                    <?php if (session()->get('role') === 'gudang'): ?>
-                        <td>soon!</td>
-                    <?php endif; ?>
+                    <td>
+                        <a href="/permintaan/detail/<?= $p['id'] ?>" class="btn btn-info btn-sm">Detail</a>
+                        <?php if (session()->get('role') === 'gudang'): ?>
+                            <a href="/permintaan/approve/<?= $p['id'] ?>" class="btn btn-success btn-sm">Setujui</a>
+                            <a href="/permintaan/reject_form/<?= $p['id'] ?>" class="btn btn-danger btn-sm">Tolak</a>
+                        <?php endif; ?>
+                    </td>
+
                 </tr>
             <?php endforeach;
         else: ?>
