@@ -19,7 +19,18 @@
             </a>
             <div>
                 <?php if (session()->get('isLoggedIn')): ?>
-                    <span class="me-2">Halo, <?= esc(session()->get('user_name')) ?></span>
+                    <?php
+                    $role = session()->get('role');
+                    $roleClass = [
+                    'gudang' => 'bg-primary',
+                    'dapur' => 'bg-success',
+                    ];
+                    ?>
+                    <span class="me-2 ms-auto">
+                        Halo, <?= esc(session()->get('user_name')) ?>
+                        <span class="badge <?= $roleClass[$role] ?? 'bg-secondary' ?>"><?= esc($role) ?></span>
+                    </span>
+                    </span>
                     <a class="btn btn-sm btn-outline-secondary" href="/logout">Logout</a>
                 <?php else: ?>
                     <a class="btn btn-sm btn-primary" href="/login">Login</a>

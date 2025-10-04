@@ -104,8 +104,12 @@ class Bahan extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $tanggal_kadaluarsa = $this->request->getPost('tanggal_kadaluarsa');
         $jumlah = (int) $this->request->getPost('jumlah');
+        if ($jumlah <= 0) {
+            return redirect()->back()->withInput()->with('error', 'Stok tidak boleh kurang dari 0');
+        }
+
+        $tanggal_kadaluarsa = $this->request->getPost('tanggal_kadaluarsa');
         $today = strtotime(date('Y-m-d'));
         $kadaluarsa = strtotime($tanggal_kadaluarsa);
         $selisih_hari = ceil(($kadaluarsa - $today) / 86400);
@@ -124,7 +128,7 @@ class Bahan extends BaseController
         $model->update($id, [
             'nama' => $this->request->getPost('nama'),
             'kategori' => $this->request->getPost('kategori'),
-            'jumlah' => $this->request->getPost('jumlah'),
+            'jumlah' => $jumlah,
             'satuan' => $this->request->getPost('satuan'),
             'tanggal_masuk' => $this->request->getPost('tanggal_masuk'),
             'tanggal_kadaluarsa' => $tanggal_kadaluarsa,
@@ -137,8 +141,41 @@ class Bahan extends BaseController
     public function delete($id)
     {
         $model = new BahanModel();
-        $model->delete($id);
+        $bahan = $model->find($id);
 
+        if (!$bahan) {
+            return redirect()->to('/bahan')->with('error', 'Data tidak ditemukan');
+        }
+
+        // Hanya bisa hapus jika status kadaluarsa
+        if ($bahan['status'] !== 'kadaluarsa') {
+            return redirect()->to('/bahan')->with('error', 'Bahan hanya dapat dihapus jika statusnya kadaluarsa');
+        }
+
+        // Tampilkan konfirmasi hapus
+        $data = [
+            'title' => 'Konfirmasi Hapus Bahan Baku',
+            'bahan' => $bahan
+        ];
+        echo view('templates/header', $data);
+        echo view('bahan/delete_confirm', $data);
+        echo view('templates/footer');
+    }
+    // Proses hapus setelah konfirmasi
+    public function destroy($id)
+    {
+        $model = new BahanModel();
+        $bahan = $model->find($id);
+
+        if (!$bahan) {
+            return redirect()->to('/bahan')->with('error', 'Data tidak ditemukan');
+        }
+
+        if ($bahan['status'] !== 'kadaluarsa') {
+            return redirect()->to('/bahan')->with('error', 'Bahan hanya dapat dihapus jika statusnya kadaluarsa');
+        }
+
+        $model->delete($id);
         return redirect()->to('/bahan')->with('success', 'Bahan berhasil dihapus');
     }
 }
