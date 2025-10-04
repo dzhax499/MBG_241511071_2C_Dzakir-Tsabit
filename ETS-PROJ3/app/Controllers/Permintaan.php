@@ -38,4 +38,62 @@ class Permintaan extends BaseController
             . view('permintaan/index', $data)
             . view('templates/footer');
     }
+
+    public function create()
+    {
+        $bahanModel = new BahanModel();
+        $data = [
+            'title' => 'Buat Permintaan Baru',
+            'bahan' => $bahanModel->findAll()
+        ];
+
+        echo view('templates/header', $data);
+        echo view('permintaan/create', $data);
+        echo view('templates/footer');
+    }
+
+    public function store()
+    {
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $permintaanModel = new \App\Models\PermintaanModel();
+        $detailModel = new \App\Models\PermintaanDetailModel();
+
+        $permintaanId = $permintaanModel->insert([
+            'pemohon_id'   => session()->get('user_id'),
+            'tgl_masak'    => $this->request->getPost('tgl_masak'),
+            'menu_makan'   => $this->request->getPost('menu_makan'),
+            'jumlah_porsi' => $this->request->getPost('jumlah_porsi'),
+            'status'       => 'menunggu',
+            'created_at'   => date('Y-m-d H:i:s')
+        ]);
+
+        if (! $permintaanId) {
+            $db->transRollback();
+            return redirect()->back()->with('error', 'Gagal menyimpan permintaan')->withInput();
+        }
+
+        $bahan_ids = $this->request->getPost('bahan_id') ?? [];
+        $jumlahs   = $this->request->getPost('jumlah_diminta') ?? [];
+
+        foreach ($bahan_ids as $bahanId) {
+            $jumlah_diminta = isset($jumlahs[$bahanId]) ? (int)$jumlahs[$bahanId] : 0;
+            if ($jumlah_diminta <= 0) continue;
+
+            $detailModel->insert([
+                'permintaan_id'   => $permintaanId,
+                'bahan_id'        => $bahanId,
+                'jumlah_diminta'  => $jumlah_diminta
+            ]);
+        }
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()->back()->with('error', 'Gagal menyimpan permintaan (transaksi)')->withInput();
+        }
+
+        return redirect()->to('/permintaan')->with('success', 'Permintaan berhasil dibuat');
+    }
 }

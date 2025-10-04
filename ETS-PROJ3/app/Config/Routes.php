@@ -5,8 +5,8 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-// app/Config/Routes.php  (tambah ini)
-$routes->get('/', 'Auth::login');
+// app/Config/Routes.php
+// $routes->get('/', 'Auth::login');
 $routes->get('/login', 'Auth::login');
 $routes->post('/auth/attempt', 'Auth::attempt');
 $routes->get('/logout', 'Auth::logout');
@@ -25,5 +25,15 @@ $routes->group('bahan', ['filter' => 'role:gudang'], function ($routes) {
 
 $routes->group('permintaan', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'Permintaan::index');
+    $routes->get('create', 'Permintaan::create', ['filter' => 'role:dapur']);
+    $routes->post('store', 'Permintaan::store', ['filter' => 'role:dapur']);
+});
 
+// jika sudah login maka login akan di arahkan ke dashboard
+$routes->get('/', function () {
+    $session = session();
+    if ($session->get('isLoggedIn')) {
+        return redirect()->to('/dashboard');
+    }
+    return redirect()->to('/login');
 });

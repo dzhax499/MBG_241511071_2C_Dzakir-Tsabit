@@ -13,3 +13,8 @@
     <button class="btn btn-danger">Hapus</button>
     <a href="/bahan" class="btn btn-secondary">Batal</a>
 </form>
+<?php if (session()->getFlashdata('error')): ?>
+    <div class="alert alert-danger">
+        <?= session()->getFlashdata('error') ?>
+    </div>
+<?php endif; ?>

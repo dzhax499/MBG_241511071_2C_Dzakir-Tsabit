@@ -2,6 +2,7 @@
 <?php if (session()->get('role') === 'dapur'): ?>
     <a href="/permintaan/create" class="btn btn-primary mb-3">+ Permintaan Baru</a>
 <?php endif; ?>
+<a href="/dashboard" class="btn btn-secondary mb-3">Kembali</a>
 
 <table class="table table-bordered">
     <thead>
@@ -34,7 +35,12 @@
                         <?php else: ?>
                             <span class="badge bg-danger">Ditolak</span>
                         <?php endif; ?>
+
+                        <?php if (session()->getFlashdata('error') && session()->get('role') === 'dapur'): ?>
+                            <br><small class="text-danger"><?= session()->getFlashdata('error') ?></small>
+                        <?php endif; ?>
                     </td>
+
                     <?php if (session()->get('role') === 'gudang'): ?>
                         <td>soon!</td>
                     <?php endif; ?>

@@ -141,18 +141,29 @@ class Bahan extends BaseController
     public function delete($id)
     {
         $model = new BahanModel();
+        $detailModel = new \App\Models\PermintaanDetailModel();
+
         $bahan = $model->find($id);
 
         if (!$bahan) {
             return redirect()->to('/bahan')->with('error', 'Data tidak ditemukan');
         }
-
+        
         // Hanya bisa hapus jika status kadaluarsa
         if ($bahan['status'] !== 'kadaluarsa') {
             return redirect()->to('/bahan')->with('error', 'Bahan hanya dapat dihapus jika statusnya kadaluarsa');
+        
+        // Cek apakah bahan dipakai di permintaan
+        $dipakai = $detailModel->where('bahan_id', $id)->countAllResults();
+
+        if ($dipakai > 0) {
+            return redirect()->to('/bahan')->with(
+                'error',
+                "Bahan <b>{$bahan['nama']}</b> masih dipakai di {$dipakai} permintaan dapur, tidak bisa dihapus!"
+            );
         }
 
-        // Tampilkan konfirmasi hapus
+        // Kalau tidak dipakai, tampilkan konfirmasi hapus
         $data = [
             'title' => 'Konfirmasi Hapus Bahan Baku',
             'bahan' => $bahan
@@ -160,7 +171,7 @@ class Bahan extends BaseController
         echo view('templates/header', $data);
         echo view('bahan/delete_confirm', $data);
         echo view('templates/footer');
-    }
+    } }
     // Proses hapus setelah konfirmasi
     public function destroy($id)
     {

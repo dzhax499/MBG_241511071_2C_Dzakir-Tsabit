@@ -1,5 +1,6 @@
 <h3>Daftar Bahan Baku</h3>
 <a href="/bahan/create" class="btn btn-primary mb-3">+ Tambah Bahan</a>
+<a href="/dashboard" class="btn btn-secondary mb-3">Kembali</a>
 
 <table class="table table-bordered">
     <thead>
